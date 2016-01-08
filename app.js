@@ -8,16 +8,22 @@ app.directive('upload', function($rootScope){
         scope: {callback: '='},
         template: '<input type="file" style="display: none;"></input><button type="button" class="btn btn-xs btn-primary" ng-click="openf()">{{fname}}</button><hr />',
         link: function(scope, elem, attr){
-            scope.fname = 'Selectionner fichier'; //nom du fichier sélectionné
+            scope.fname = 'Selectionner fichier'; //Libellé bouton d'upload/nom du fichier sélectionné
             var reader = new FileReader();
             reader.onload = (function(){
                 return function(e){
+                    /*
+                     * callback de traitement de la lecture du fichier
+                     */
                     $rootScope.$apply(
-                    scope.callback(String(e.target.result))
+                        scope.callback(String(e.target.result))
                     );
                     }})();
             elem[0].children[0].onchange = function(){
                 scope.fname = elem[0].children[0].files[0].name;
+                /*
+                 * lecture du fichier uploadé
+                 */
                 reader.readAsText(elem[0].children[0].files[0]);
             };
             scope.openf = function(){
@@ -30,18 +36,18 @@ app.directive('upload', function($rootScope){
 app.controller('mainCtrl', function(){
     var selected = false;
     var self = this;
-    this.lst = [] //liste des mesures
-    this.fc = 0; //borne de fin de calcul
-    this.dc = 0; //borne de début de calcul
-    this.k = 0; //sel ajouté
-    this.iv = 10; //intervalle de prise de mesure
-    this.c_init = 0; //conductivité initiale
-    this.debit = 0; //débit
-    this.item_lst = []; //liste des lignes du csv
-    this.id_op = ''; //identifiant opérateur
-    this.heure_session = ''; //heure de début des mesures
-    this.date_session = ''; //date des mesures
-    this.lieu_session = ''; //lieu de mesure
+    this.lst = [] // liste des mesures
+    this.fc = 0; // borne de fin de calcul
+    this.dc = 0; // borne de début de calcul
+    this.k = 0; // quantité de sel ajoutée
+    this.iv = 10; // intervalle de prise de mesure
+    this.c_init = 0; // conductivité initiale
+    this.debit = 0; // débit
+    this.item_lst = []; // liste des lignes du csv
+    this.id_op = ''; // identifiant opérateur
+    this.heure_session = ''; // heure de début des mesures
+    this.date_session = ''; // date des mesures
+    this.lieu_session = ''; // lieu de mesure
     this.svg_cnf = '';
     this.svg_data = '';
 
@@ -113,14 +119,14 @@ app.controller('mainCtrl', function(){
         this.debit_min = this.debit * 0.9;
     };
 
-    this.parseUpload = function(v){
+    this.parseUpload = function(csv_file){
         /*
          * analyse le fichier csv pour en tirer les informations nécéssaires
          * fonction passée en callback de la directive d'upload
          */
         var item_lst = [];
         var item_total = [];
-        v.trim().split('\n').forEach(function(ln){
+        csv_file.trim().split('\n').forEach(function(ln){
             var item = ln.split(',');
             item_total.push(item);
             if(item[5] == 'CDC401'){
@@ -166,6 +172,10 @@ app.controller('mainCtrl', function(){
             out.push(str_ln);
         });
         var str_out = out.join('\n');
+
+        /*
+         * creation et destruction à la volée d'une ancre pour le téléchargement de fichier
+         */
         var dwn = document.createElement('a');
         dwn.setAttribute('href', 'data:text/csv,' + encodeURIComponent(str_out));
         dwn.setAttribute('download', 'calcul_' + self.item_lst[0][2] + '_' + self.lieu_session.trim() + '.csv');
@@ -173,9 +183,5 @@ app.controller('mainCtrl', function(){
         document.body.appendChild(dwn);
         dwn.click();
         document.body.removeChild(dwn);
-
-        /*var w = window.open('', '', 'content-type=text/csv');
-        w.document.write(str_out);
-        w.document.close();*/
     }
 });
