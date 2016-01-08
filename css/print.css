@@ -1,0 +1,41 @@
+body{
+    font-size: 80%;
+}
+.svgs{
+    width: 100%;
+    border: 2px solid #CCC;
+    margin-bottom: 1cm;
+}
+.logopnc{
+    height: 3cm;
+    float: left;
+}
+.lieu{
+    text-align: center;
+    width: 100%;
+    height: 2cm;
+    margin-bottom: 2cm;
+}
+.lieu::before{
+    content: "Lieu de mesure : ";
+}
+
+.sform, .mesures, .results h2{
+    display: none;
+}
+.results{
+    list-style-type: none;
+    font-weight: 100;
+    border: 2px solid #AAA;
+    padding: 5mm;
+}
+.important{
+    font-weight: 900;
+}
+.legende{
+    color:red;
+    font-weight: 100;
+}
+.underlined{
+    text-decoration: underline;
+}

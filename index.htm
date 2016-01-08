@@ -1,0 +1,94 @@
+<html ng-app="eau">
+    <head>
+        <meta charset="utf8" />
+        <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.8/angular.min.js"></script>
+        <script src="app.js"></script>
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css"/>
+
+        <link rel="stylesheet" href="css/screen.css" media="screen" />
+        <link rel="stylesheet" href="css/print.css" media="print" />
+    </head>
+    <body ng-controller="mainCtrl as c">
+        <img class="logopnc" src="img/logo_pnc_orange.png" alt="logo" />
+        <h1 class="lieu">{{c.lieu_session}}</h1>
+        <div class="svgs">
+            <svg viewBox="0 0 8000 1020">
+                <style>
+                    .vert{
+                        fill: #CCEECC;
+                    }
+
+                    .vert:hover{
+                        fill: #AACCAA;
+                    }
+
+                    .rouge{
+                        fill: #EECCCC;
+                    }
+
+                    .rouge:hover{
+                        fill: #CCAAAA;
+                    }
+
+                </style>
+                <polyline fill="none" stroke="black" ng-attr-points="{{c.svg_data.join(' ')}}" />
+                <circle class="svgc" ng-repeat="coords in c.svg_data" ng-attr-cx="{{coords.split(',')[0]}}" ng-attr-cy="{{coords.split(',')[1]}}" r="10" stroke="black" ng-click="c.collect($index)" ng-class="{'vert': $index<c.dc, 'rouge': ($index>=c.dc && $index<=c.fc)}"  />
+            </svg>
+        </div>
+        <div class="sform">
+            <h2>Données</h2>
+            <div class="form form-inline frm">
+                <upload callback="c.parseUpload"></upload>
+                <div>
+                    <label for="ope">Opérateur</label>
+                    <input class="form-control" id="ope" ng-model="c.id_op"></input>
+                </div>
+                <div>
+                    <label for="sel">Sel</label>
+                    <input class="form-control" id="sel"type="number" step="0.1" ng-model="c.k"></input>
+                </div>
+                <div>
+                    <label for="iv">intervalle</label>
+                    <input class="form-control" id="iv" type="number" ng-model="c.iv"></input>
+                </div>
+                <div>
+                    <label for="dc">début calcul <span class="glyphicon glyphicon-asterisk" ng-if="!c.select()"></span></label>
+                    <input class="form-control" id="dc" type="number" ng-model="c.dc" ng-focus="c.select(0)"></input>
+                </div>
+                <div>
+                    <label for="fc">fin calcul <span class="glyphicon glyphicon-asterisk" ng-if="c.select()"></span></label>
+                    <input class="form-control" id="fc" type="number" ng-model="c.fc" ng-focus="c.select(1)"></input>
+                </div>
+                <button type="button" class="btn btn-warning" ng-click="c.calc()">Calcul</button>
+                <button type="button" class="btn btn-success drt" ng-click="c.save()">Enreg</button>
+            </div>
+        </div>
+        <div class="mesures">
+            <h2>Liste des mesures</h2>
+            <ul style="list-style-type: none; margin: 0; padding: 0;">
+                <li ng-repeat="elem in c.item_lst track by $index" ng-class="{'selectionne': (c.dc<=$index&&$index<=c.fc)}">
+                <span style="display: block;" ng-class="{'bgodd': $odd}" ng-click="c.collect($index)"><span class="gris">{{elem[3]}}</span> - {{elem[9]}}
+                        <span ng-if="$index==c.dc"> - Début calcul</span>
+                        <span ng-if="$index==c.fc"> - Fin calcul</span>
+                    </span>
+                </li>
+            </ul>
+        </div>
+        <div class="results">
+            <h2>Résultats</h2>
+            <ul style="list-style-type: none">
+                <li>Date de mesure : {{c.date_session}}</li>
+                <li>Heure : {{c.heure_session}}</li>
+                <li>Opérateur : {{c.id_op}}</li>
+                <li>Conductivité initiale : {{c.c_init|number:2}} µS/cm</li>
+                <li>Température de référence : {{c.temper}}°C</li>
+                <li>Sel injecté : {{c.k}} g <span class="legende">[K]</span></li>
+                <li>Conductivité moyenne durant le passage du flux : {{c.cm|number:2}} µS/cm</li>
+                <li>Difference entre conductivité moyenne et conductivité initiale : {{c.cn|number:2}} µS/cm <span class="legende">[Cn]</span></li>
+                <li>Temps de passage du flux : {{c.de}} secondes <span class="legende">[t]</span></li>
+                <li>Débit calculé : <span class="important">{{c.debit|number:2}}</span> litres/seconde <span class="legende">[Q=(K*1000*1.86)/(Cn*t)]</span></li>
+                <li class="underlined">Débit estimé entre : <span class="important">{{c.debit_min|number:2}}</span> et <span class="important">{{c.debit_max|number:2}}</span> litres/seconde <span class="legende">[Q+-10%]</span></li>
+            </ul>
+        </div>
+    </body>
+</html>

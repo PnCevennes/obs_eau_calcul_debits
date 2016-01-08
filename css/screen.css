@@ -1,0 +1,83 @@
+body{
+    font-family: sans;
+}
+.logopnc{
+    float: left;
+    height: 80px;
+    vertical-align: middle;
+}
+.lieu{
+    height: 100px;
+    text-align: center;
+}
+.sform{
+    width: 30em;
+    margin: 20px;
+    float: left;
+}
+
+.drt{
+    float: right;
+    margin-right: 30px;
+}
+
+.frm div{
+    margin-bottom: 5px;
+}
+.results{
+    /*position: absolute;
+    top: 480px;
+    right: 50px;
+    width: 800px;
+    font-weight: 900;*/
+    float: left;
+    list-style-type: none;
+    margin: 20px;
+}
+.results ul{
+    padding: 0;
+}
+.legende{
+    color:red;
+    font-weight: 100;
+}
+.bgodd{
+    background-color: #EAEAEA;
+}
+.gris{
+    color: #888888;
+}
+.mesures{
+    float:left;
+    margin: 20px;
+}
+.mesures ul{
+    height: 40em;
+    width: 30em;
+    overflow-y: scroll;
+}
+.selectionne{
+    background-color: #FEE;
+}
+label{
+    display: inline-block;
+    width: 10em;
+}
+
+.svgs{
+    padding: 5px;
+    margin-left: 5%;
+    width: 90%;
+    border: 2px solid #CCC;
+    border-radius: 5px;
+}
+
+.svgc{
+    fill: blue;
+    cursor: pointer;
+}
+
+.svgc:hover{
+    fill: red;
+    cursor: pointer;
+}
