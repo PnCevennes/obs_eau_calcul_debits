@@ -45,19 +45,19 @@
                 </div>
                 <div>
                     <label for="sel">Sel</label>
-                    <input class="form-control" id="sel"type="number" step="0.1" ng-model="c.k"></input>
+                    <input class="form-control" id="sel"type="number" step="0.1" ng-model="c.k" ng-model-options="{getterSetter: true}" ></input>
                 </div>
                 <div>
                     <label for="iv">intervalle</label>
-                    <input class="form-control" id="iv" type="number" ng-model="c.iv"></input>
+                    <input class="form-control" id="iv" type="number" ng-model="c.iv" ng-model-options="{getterSetter: true}" ></input>
                 </div>
                 <div>
                     <label for="dc">début calcul <span class="glyphicon glyphicon-asterisk" ng-if="!c.select()"></span></label>
-                    <input class="form-control" id="dc" type="number" ng-model="c.dc" ng-focus="c.select(0)"></input>
+                    <input class="form-control" id="dc" type="number" ng-model="c.cdc" ng-focus="c.select(0)" ng-model-options="{getterSetter: true}"></input>
                 </div>
                 <div>
                     <label for="fc">fin calcul <span class="glyphicon glyphicon-asterisk" ng-if="c.select()"></span></label>
-                    <input class="form-control" id="fc" type="number" ng-model="c.fc" ng-focus="c.select(1)"></input>
+                    <input class="form-control" id="fc" type="number" ng-model="c.cfc" ng-focus="c.select(1)" ng-model-options="{getterSetter: true}"></input>
                 </div>
                 <button type="button" class="btn btn-warning" ng-click="c.calc()">Calcul</button>
                 <button type="button" class="btn btn-success drt" ng-click="c.save()">Enreg</button>

@@ -36,11 +36,11 @@ app.directive('upload', function($rootScope){
 app.controller('mainCtrl', function(){
     var selected = false;
     var self = this;
+    var _k = 0; //quantité de sel ajouté
+    var _iv = 10; // intervalle de prise de mesure
     this.lst = [] // liste des mesures
     this.fc = 0; // borne de fin de calcul
     this.dc = 0; // borne de début de calcul
-    this.k = 0; // quantité de sel ajoutée
-    this.iv = 10; // intervalle de prise de mesure
     this.c_init = 0; // conductivité initiale
     this.debit = 0; // débit
     this.item_lst = []; // liste des lignes du csv
@@ -50,6 +50,38 @@ app.controller('mainCtrl', function(){
     this.lieu_session = ''; // lieu de mesure
     this.svg_cnf = '';
     this.svg_data = '';
+
+    this.k = function(qk){
+        if(qk === undefined){
+            return _k
+        }
+        _k = qk;
+        this.calc();
+    };
+
+    this.iv = function(x){
+        if(x === undefined){
+            return _iv
+        }
+        _iv = x;
+        this.calc();
+    };
+
+    this.cdc = function(x){
+        if(x === undefined){
+            return this.dc
+        }
+        this.dc = x;
+        this.calc();
+    };
+
+    this.cfc = function(x){
+        if(x === undefined){
+            return this.fc
+        }
+        this.fc = x;
+        this.calc();
+    };
 
 
 
@@ -113,8 +145,8 @@ app.controller('mainCtrl', function(){
         this.c_init = avg(_data.slice(0, this.dc));
         this.cm = avg(_data.slice(this.dc, this.fc))
         this.cn = this.cm-this.c_init;
-        this.de = ((this.fc-this.dc)*this.iv);
-        this.debit = (this.k * 1860) / (this.cn * this.de);
+        this.de = ((this.fc-this.dc)*_iv);
+        this.debit = (_k * 1860) / (this.cn * this.de);
         this.debit_max = this.debit * 1.1;
         this.debit_min = this.debit * 0.9;
     };
@@ -135,10 +167,10 @@ app.controller('mainCtrl', function(){
         });
         if(item_total[0][0] == '__configuration__'){
             var config = item_total[0];
-            self.k = parseInt(config[1]);
+            _k = parseInt(config[1]);
             self.dc = parseInt(config[2]);
             self.fc = parseInt(config[3]);
-            self.iv = parseInt(config[4]);
+            _iv = parseInt(config[4]);
         }
         self.item_lst = item_lst.reverse();
 
@@ -162,7 +194,7 @@ app.controller('mainCtrl', function(){
 
     this.save = function(){
         var first_line = Array(self.item_lst[0].length-1);
-        ['__configuration__', self.k, self.dc, self.fc, self.iv].forEach(function(v, k){
+        ['__configuration__', _k, self.dc, self.fc, _iv].forEach(function(v, k){
             first_line[k] = v;
         });
         
