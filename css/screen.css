@@ -2,12 +2,15 @@ body{
     font-family: sans;
 }
 .logopnc{
-    float: left;
-    height: 80px;
-    vertical-align: middle;
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100px;
+
 }
 .lieu{
     height: 100px;
+    margin-top: 1em;
     text-align: center;
 }
 .sform{
@@ -52,7 +55,7 @@ body{
     margin: 20px;
 }
 .mesures ul{
-    height: 40em;
+    height: 30em;
     width: 30em;
     overflow-y: scroll;
 }

@@ -2,6 +2,19 @@
 
 var app = angular.module('eau', []);
 
+const SONDE = 'CDC401';
+const CONFIG_K = 1;
+const CONFIG_DEBUT_CALCUL = 2;
+const CONFIG_FIN_CALCUL = 3;
+const CONFIG_INTERVALLE = 4;
+const CONFIG_LIBELLE_LIEU = 5;
+const INIT_DATE = 2;
+const INIT_HEURE = 3;
+const INIT_LIEU = 8;
+const INIT_OPERATEUR = 4;
+const INIT_TEMPERATURE = 11;
+const INIT_MESURES = 9;
+
 app.directive('upload', function($rootScope){
     return {
         restrict: 'E',
@@ -33,11 +46,13 @@ app.directive('upload', function($rootScope){
     }
 });
 
+
 app.controller('mainCtrl', function(){
     var selected = false;
     var self = this;
     var _k = 0; //quantité de sel ajouté
     var _iv = 10; // intervalle de prise de mesure
+    this.qk = 0; //quantité de sel a afficher
     this.lst = [] // liste des mesures
     this.fc = 0; // borne de fin de calcul
     this.dc = 0; // borne de début de calcul
@@ -50,13 +65,24 @@ app.controller('mainCtrl', function(){
     this.lieu_session = ''; // lieu de mesure
     this.svg_cnf = '';
     this.svg_data = '';
+    this.releves = {};
+    this.lieux = [];
+    this.libelle_lieu = '';
+    this.svg_rayon_point = 10;
 
     this.k = function(qk){
+        /*
         if(qk === undefined){
             return _k
         }
+        */
+        if(!arguments.length){
+            return _k;
+        }
         _k = qk;
+        this.qk = _k
         this.calc();
+        return _k;
     };
 
     this.iv = function(x){
@@ -152,54 +178,106 @@ app.controller('mainCtrl', function(){
     };
 
     this.parseUpload = function(csv_file){
+        self.item_lst = [];
+        self.csv_data = [];
+        self.releves = {};
+        self.lieux = [];
+        var lines = csv_file.trim().split('\n').map(function(i){return i.split(',')});
+        if(lines[0][0] == '__configuration__'){
+            var config = lines.splice(0, 1)[0];
+            self.parseData(lines[1][INIT_LIEU].replace(/(\(\d+\))$/, ''), config, lines);
+            return
+        }
+        lines.forEach(function(ln){
+            if(ln[5] == SONDE){
+                var lieu = ln[INIT_LIEU].replace(/(\(\d+\))$/, '');
+                if(!self.releves[lieu]){
+                    self.lieux.push(lieu);
+                    self.releves[lieu] = {config: [0,0,0,0,10,lieu], data: []};
+                }
+                self.releves[lieu].data.push(ln);
+            }
+        });
+
+        var lieu_ = null;
+        for(lieu_ in self.releves){
+            self.releves[lieu_].data = self.releves[lieu_].data.reverse();
+        }
+    }
+
+    this.supprim = function(idx, evt){
+        this.item_lst.splice(idx, 1);
+        this.lst.splice(idx, 1);
+        this.refresh_svg();
+        this.calc();
+    }
+
+    this.selectData = function(name){
+
+        self.libelle_lieu = self.releves[self.lieu].config[CONFIG_LIBELLE_LIEU];
+        self.parseData(lieu, self.releves[self.lieu].config, self.releves[self.lieu].data);
+    }
+
+    this.format_date = function(str){
+        var dt_items = str.trim().split('-');
+        var dte = new Date(dt_items[2], dt_items[1], dt_items[0]);
+        var out = ('0' + dte.getDate()).substr(-2) + '/' + ('0' + (dte.getMonth() + 1)).substr(-2) + '/' + dte.getFullYear();
+        return out;
+        //return dte.toLocaleFormat('%d/%m/%Y');
+    }
+
+    this.parseData = function(lieu, config, data){
         /*
          * analyse le fichier csv pour en tirer les informations nécéssaires
          * fonction passée en callback de la directive d'upload
          */
-        var item_lst = [];
-        var item_total = [];
-        csv_file.trim().split('\n').forEach(function(ln){
-            var item = ln.split(',');
-            item_total.push(item);
-            if(item[5] == 'CDC401'){
-                item_lst.push(item);
-            }
-        });
-        if(item_total[0][0] == '__configuration__'){
-            var config = item_total[0];
-            _k = parseInt(config[1]);
-            self.dc = parseInt(config[2]);
-            self.fc = parseInt(config[3]);
-            _iv = parseInt(config[4]);
-        }
-        self.item_lst = item_lst.reverse();
+        _k = parseInt(config[CONFIG_K]);
+        self.qk = _k;
+        self.libelle_lieu = config[CONFIG_LIBELLE_LIEU];
+        self.dc = parseInt(config[CONFIG_DEBUT_CALCUL]);
+        self.fc = parseInt(config[CONFIG_FIN_CALCUL]);
+        _iv = parseInt(config[CONFIG_INTERVALLE]);
+        self.item_lst = data;
 
-        self.date_session = self.item_lst[0][2].replace(/(\d+)-(\w+)-(\d+)/, '$1 $2. $3');
-        self.heure_session = self.item_lst[0][3];
-        self.lieu_session = self.item_lst[0][8].replace(/(\(\d+\))$/, '');
-        self.id_op = self.item_lst[0][4];
-        self.temper = self.item_lst[0][11];
+        //self.date_session = self.item_lst[0][INIT_DATE].replace(/(\d+)-(\w+)-(\d+)/, '$1 $2. $3');
+        self.date_session = self.format_date(self.item_lst[0][INIT_DATE]);
+        self.heure_session = self.item_lst[0][INIT_HEURE];
+        self.lieu_session = self.item_lst[0][INIT_LIEU].replace(/(\(\d+\))$/, '');
+        self.id_op = self.item_lst[0][INIT_OPERATEUR];
+        self.temper = self.item_lst[0][INIT_TEMPERATURE];
         var mes_lst = []; 
         self.item_lst.forEach(function(x){
-            mes_lst.push(parseFloat(x[9]));
+            mes_lst.push(parseFloat(x[INIT_MESURES]));
         });
+        if(mes_lst.length<200){
+            self.svg_rayon_point = 20;
+        }
+        else{
+            self.svg_rayon_point = 10;
+        }
         self.lst = self.init(mes_lst);
         self.svg_data = [];
-        var ratio_x = 8000/self.lst.length;
-        self.lst.forEach(function(y, x){
-            self.svg_data.push((x*ratio_x) + ',' + (105-y)*10);
-        });
+        self.refresh_svg();
         self.calc();
     };
 
+    this.refresh_svg = function(){
+        self.svg_data = [];
+        var ratio_x = 10000/self.lst.length;
+        self.lst.forEach(function(y, x){
+            self.svg_data.push((x*ratio_x) + ',' + (105-y)*10);
+        });
+    }
+
     this.save = function(){
         var first_line = Array(self.item_lst[0].length-1);
-        ['__configuration__', _k, self.dc, self.fc, _iv].forEach(function(v, k){
+        ['__configuration__', _k, self.dc, self.fc, _iv, self.libelle_lieu].forEach(function(v, k){
             first_line[k] = v;
         });
         
         var out = [first_line.join(',')];
-        self.item_lst.reverse().forEach(function(ln){
+        //self.item_lst.reverse().forEach(function(ln){
+        self.item_lst.forEach(function(ln){
             var str_ln = ln.join(',');
             out.push(str_ln);
         });
@@ -210,7 +288,7 @@ app.controller('mainCtrl', function(){
          */
         var dwn = document.createElement('a');
         dwn.setAttribute('href', 'data:text/csv,' + encodeURIComponent(str_out));
-        dwn.setAttribute('download', 'calcul_' + self.item_lst[0][2] + '_' + self.lieu_session.trim() + '.csv');
+        dwn.setAttribute('download', 'calcul_' + self.date_session.replace(/\//g, '-') + '_' + self.lieu_session.trim() + '.csv');
         dwn.style.display = 'none';
         document.body.appendChild(dwn);
         dwn.click();

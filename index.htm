@@ -1,44 +1,56 @@
 <html ng-app="eau">
     <head>
         <meta charset="utf8" />
-        <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.8/angular.min.js"></script>
+        <script src="node_modules/angular/angular.min.js"></script>
         <script src="app.js"></script>
-        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css"/>
+        <link rel="stylesheet" href="node_modules/bootstrap/dist/css/bootstrap.min.css"/>
 
         <link rel="stylesheet" href="css/screen.css" media="screen" />
         <link rel="stylesheet" href="css/print.css" media="print" />
     </head>
     <body ng-controller="mainCtrl as c">
         <img class="logopnc" src="img/logo_pnc_orange.png" alt="logo" />
-        <h1 class="lieu">{{c.lieu_session}}</h1>
+        <h1 class="lieu">{{c.libelle_lieu}}</h1>
         <div class="svgs">
-            <svg viewBox="0 0 8000 1020">
+            <svg viewBox="0 0 10000 1020">
                 <style>
                     .vert{
                         fill: #CCEECC;
+                        stroke-width: 5;
                     }
 
                     .vert:hover{
                         fill: #AACCAA;
+                        stroke-width: 15;
                     }
 
                     .rouge{
                         fill: #EECCCC;
+                        stroke-width: 5;
                     }
 
                     .rouge:hover{
                         fill: #CCAAAA;
+                        stroke-width: 15;
                     }
 
                 </style>
                 <polyline fill="none" stroke="black" ng-attr-points="{{c.svg_data.join(' ')}}" />
-                <circle class="svgc" ng-repeat="coords in c.svg_data" ng-attr-cx="{{coords.split(',')[0]}}" ng-attr-cy="{{coords.split(',')[1]}}" r="10" stroke="black" ng-click="c.collect($index)" ng-class="{'vert': $index<c.dc, 'rouge': ($index>=c.dc && $index<=c.fc)}"  />
+                <circle class="svgc" ng-repeat="coords in c.svg_data" ng-attr-cx="{{coords.split(',')[0]}}" ng-attr-cy="{{coords.split(',')[1]}}" ng-attr-r="{{c.svg_rayon_point}}" stroke="black" ng-click="c.collect($index)" ng-class="{'vert': $index<c.dc, 'rouge': ($index>=c.dc && $index<=c.fc)}"  />
             </svg>
         </div>
         <div class="sform">
             <h2>Données</h2>
             <div class="form form-inline frm">
                 <upload callback="c.parseUpload"></upload>
+                <div ng-if="c.lieux.length">
+                    <label for="lieu">Lieu</label>
+                    <select id="lieu" ng-options="opt for opt in c.lieux" ng-change="c.selectData()" ng-model="c.lieu"></select>
+                </div>
+                <div>
+                    <label for="lib_lieu">Libellé lieu</label>
+                    <input class="form-control" type="text" id="lib_lieu" ng-model="c.libelle_lieu"></input>
+                </div>
                 <div>
                     <label for="ope">Opérateur</label>
                     <input class="form-control" id="ope" ng-model="c.id_op"></input>
@@ -67,7 +79,8 @@
             <h2>Liste des mesures</h2>
             <ul style="list-style-type: none; margin: 0; padding: 0;">
                 <li ng-repeat="elem in c.item_lst track by $index" ng-class="{'selectionne': (c.dc<=$index&&$index<=c.fc)}">
-                <span style="display: block;" ng-class="{'bgodd': $odd}" ng-click="c.collect($index)"><span class="gris">{{elem[3]}}</span> - {{elem[9]}}
+                <button type="button" class="btn btn-xs btn-warning" ng-click="c.supprim($index)">x</button>
+                <span style="display: inline-block; width: 90%" ng-class="{'bgodd': $odd}" ng-click="c.collect($index)"><span class="gris">{{elem[3]}}</span> - {{elem[9]}}
                         <span ng-if="$index==c.dc"> - Début calcul</span>
                         <span ng-if="$index==c.fc"> - Fin calcul</span>
                     </span>
@@ -82,7 +95,7 @@
                 <li>Opérateur : {{c.id_op}}</li>
                 <li>Conductivité initiale : {{c.c_init|number:2}} µS/cm</li>
                 <li>Température de référence : {{c.temper}}°C</li>
-                <li>Sel injecté : {{c.k}} g <span class="legende">[K]</span></li>
+                <li>Sel injecté : {{c.qk}} g <span class="legende">[K]</span></li>
                 <li>Conductivité moyenne durant le passage du flux : {{c.cm|number:2}} µS/cm</li>
                 <li>Difference entre conductivité moyenne et conductivité initiale : {{c.cn|number:2}} µS/cm <span class="legende">[Cn]</span></li>
                 <li>Temps de passage du flux : {{c.de}} secondes <span class="legende">[t]</span></li>

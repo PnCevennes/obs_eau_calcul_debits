@@ -1,32 +1,47 @@
 body{
-    font-size: 80%;
+    font-size: 100%;
+    font-family: serif;
 }
 .svgs{
+    position: absolute;
+    top: 5cm;
+    left: 0;
     width: 100%;
-    border: 2px solid #CCC;
+    border-top: 2px solid #CCC;
+    border-bottom: 2px solid #CCC;
+    padding-top: 1cm;
+    padding-bottom: 1cm;
+    padding-left: 0.5cm;
+    padding-right: 0.5cm;
     margin-bottom: 1cm;
 }
 .logopnc{
+    position: absolute;
+    top: 0;
+    left: 0;
     height: 3cm;
-    float: left;
 }
 .lieu{
+    float: right;
     text-align: center;
-    width: 100%;
+    width: 70%;
     height: 2cm;
-    margin-bottom: 2cm;
-}
-.lieu::before{
-    content: "Lieu de mesure : ";
+    padding-bottom: 1cm;
+    margin-bottom: 1cm;
 }
 
 .sform, .mesures, .results h2{
     display: none;
 }
 .results{
+    position: absolute;
+    top: 10cm;
+    left: 0;
+    width: 100%;
     list-style-type: none;
     font-weight: 100;
-    border: 2px solid #AAA;
+    border-top: 2px solid #AAA;
+    border-bottom: 2px solid #AAA;
     padding: 5mm;
 }
 .important{

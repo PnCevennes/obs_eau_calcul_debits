@@ -1,0 +1,22 @@
+{
+  "name": "obs_eau_calcul_debits",
+  "version": "0.0.0",
+  "description": "Petite application de calcul de débit de cours d'eau ====================================================",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/PnCevennes/obs_eau_calcul_debits.git"
+  },
+  "author": "",
+  "license": "BSD-2-Clause",
+  "bugs": {
+    "url": "https://github.com/PnCevennes/obs_eau_calcul_debits/issues"
+  },
+  "dependencies": {
+    "angular": "~1.5.5",
+    "bootstrap": "~3.3.6"
+  }
+}
