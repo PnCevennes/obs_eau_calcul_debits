@@ -50,8 +50,7 @@ app.directive('upload', function($rootScope){
 app.controller('mainCtrl', function(){
     var selected = false;
     var self = this;
-    var _k = 0; //quantité de sel ajouté
-    var _iv = 10; // intervalle de prise de mesure
+    this.intervalle = 10; // intervalle de prise de mesure
     this.qk = 0; //quantité de sel a afficher
     this.lst = [] // liste des mesures
     this.fc = 0; // borne de fin de calcul
@@ -70,45 +69,20 @@ app.controller('mainCtrl', function(){
     this.libelle_lieu = '';
     this.svg_rayon_point = 10;
 
-    this.k = function(qk){
-        /*
-        if(qk === undefined){
-            return _k
+    function getterSetter(varname){
+        return function(x){
+            if(x === undefined){
+                return self[varname];
+            }
+            self[varname] = x;
+            self.calc()
         }
-        */
-        if(!arguments.length){
-            return _k;
-        }
-        _k = qk;
-        this.qk = _k
-        this.calc();
-        return _k;
-    };
+    }
 
-    this.iv = function(x){
-        if(x === undefined){
-            return _iv
-        }
-        _iv = x;
-        this.calc();
-    };
-
-    this.cdc = function(x){
-        if(x === undefined){
-            return this.dc
-        }
-        this.dc = x;
-        this.calc();
-    };
-
-    this.cfc = function(x){
-        if(x === undefined){
-            return this.fc
-        }
-        this.fc = x;
-        this.calc();
-    };
-
+    this.k = getterSetter('qk')
+    this.iv = getterSetter('intervalle');
+    this.cdc = getterSetter('dc');
+    this.cfc = getterSetter('fc');
 
 
     this.init = function(data){
@@ -171,8 +145,8 @@ app.controller('mainCtrl', function(){
         this.c_init = avg(_data.slice(0, this.dc));
         this.cm = avg(_data.slice(this.dc, this.fc))
         this.cn = this.cm-this.c_init;
-        this.de = ((this.fc-this.dc)*_iv);
-        this.debit = (_k * 1860) / (this.cn * this.de);
+        this.de = ((this.fc-this.dc)*self.intervalle);
+        this.debit = (self.qk * 1860) / (this.cn * this.de);
         this.debit_max = this.debit * 1.1;
         this.debit_min = this.debit * 0.9;
     };
@@ -231,12 +205,11 @@ app.controller('mainCtrl', function(){
          * analyse le fichier csv pour en tirer les informations nécéssaires
          * fonction passée en callback de la directive d'upload
          */
-        _k = parseInt(config[CONFIG_K]);
-        self.qk = _k;
+        self.qk = parseInt(config[CONFIG_K]);
         self.libelle_lieu = config[CONFIG_LIBELLE_LIEU];
         self.dc = parseInt(config[CONFIG_DEBUT_CALCUL]);
         self.fc = parseInt(config[CONFIG_FIN_CALCUL]);
-        _iv = parseInt(config[CONFIG_INTERVALLE]);
+        self.intervalle = parseInt(config[CONFIG_INTERVALLE]);
         self.item_lst = data;
 
         //self.date_session = self.item_lst[0][INIT_DATE].replace(/(\d+)-(\w+)-(\d+)/, '$1 $2. $3');
@@ -271,7 +244,7 @@ app.controller('mainCtrl', function(){
 
     this.save = function(){
         var first_line = Array(self.item_lst[0].length-1);
-        ['__configuration__', _k, self.dc, self.fc, _iv, self.libelle_lieu].forEach(function(v, k){
+        ['__configuration__', self.qk, self.dc, self.fc, self.intervalle, self.libelle_lieu].forEach(function(v, k){
             first_line[k] = v;
         });
         
